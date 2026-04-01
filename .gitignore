@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# VS Code test
+.vscode-test/
+*.vsix
+
+# Save data
+src/data/save.json
+.gitpet/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
