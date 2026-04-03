@@ -3,6 +3,10 @@
   "displayName": "GitPet",
   "description": "A virtual pet that lives in your Git repository.",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/muskan-110/GitPet-Extension.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },

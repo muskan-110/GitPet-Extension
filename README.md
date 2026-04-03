@@ -149,22 +149,26 @@ Your buddy's mood changes based on repository health:
 
 ### Getting Started
 *Your new virtual pet greeting you for the first time when you open a git repository.*
-![Getting Started Interface](assets/getting-started.png)
+![Getting Started Interface](assets/s1.png)
 
 ### Main Interface
 *The interactive GitPet sidebar where you can view your pet's mood, feed it, and see its animations.*
-......
+![Main Interface](assets/s2.png)
 
 ### Stats & Progress
 *A detailed overview displaying your Git heatmap, current level, and pet HP.*
-......
+![Stats & Progress](assets/s3.png)
 
 ### Features in Action
 *Using the Focus Mode timer while working to earn bonus XP.*
-......
+![Features in Action](assets/s4.png)
 
 ### Smart Tricks
 *Executing actual git commands like `fetch` or `status` directly via your pet's trick menu.*
-......
+![Smart Tricks](assets/s5.png)
+
+### Achievements & Awards
+*Unlocking special achievements and viewing your milestones for positive coding habits.*
+![Achievements & Awards](assets/s6.png)
 
 Enjoy your companion and happy coding!
