@@ -1,5 +1,7 @@
 # GitPet 🐶
 
+You can download the extension ZIP file from the latest release section of this repository.
+
 ## Objective
 GitPet is a fun, interactive VS Code extension that keeps you motivated by putting a virtual pet right in your sidebar. Your pet grows and levels up alongside your coding sessions, encouraging healthy coding habits, regular commits, and focused work.
 
@@ -171,6 +173,5 @@ Your buddy's mood changes based on repository health:
 *Unlocking special achievements and viewing your milestones for positive coding habits.*
 ![Achievements & Awards](assets/s6.png)
 
-You can download the extension ZIP file from the latest release section of this repository.
 
 Enjoy your companion and happy coding!
