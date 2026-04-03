@@ -171,6 +171,6 @@ Your buddy's mood changes based on repository health:
 *Unlocking special achievements and viewing your milestones for positive coding habits.*
 ![Achievements & Awards](assets/s6.png)
 
-# You can download the extension ZIP file from the latest release section of this repository.
+You can download the extension ZIP file from the latest release section of this repository.
 
 Enjoy your companion and happy coding!
