@@ -4,7 +4,7 @@
 
 import fs   from 'fs';
 import path from 'path';
-import { gitLines, status } from './gitService.js';
+import { gitLines, git } from './gitService.js';
 import {
   HEALTH_WEIGHTS,
   COMMIT_FREQ_THRESHOLDS,
@@ -13,13 +13,13 @@ import bus from '../core/eventBus.js';
 import stateManager from '../core/stateManager.js';
 import log from '../utils/logger.js';
 
-export async function calculateHealth(stats, cwd = null) {  // ← cwd added
-  const [treeScore,   treeIssues]  = await _workingTreeScore(cwd);
-  const [testScore,   testIssue]   = await _testFilesScore(cwd);
-  const [readmeScore, readmeIssue] = _readmeScore(cwd);
-  const [freqScore,   freqNote]    = _commitFrequencyScore(stats.commitsThisWeek);
-  const [streakScore, streakNote]  = _streakScore(stats.streak);
-  const [recencyScore,recencyNote] = _recentActivityScore(stats.lastCommitDate);
+export async function calculateHealth(stats, cwd = null) {
+  const [treeScore,    treeIssues]  = await _workingTreeScore(cwd);
+  const [testScore,    testIssue]   = await _testFilesScore(cwd);
+  const [readmeScore,  readmeIssue] = _readmeScore(cwd);
+  const [freqScore,    freqNote]    = _commitFrequencyScore(stats.commitsThisWeek);
+  const [streakScore,  streakNote]  = _streakScore(stats.streak);
+  const [recencyScore, recencyNote] = _recentActivityScore(stats.lastCommitDate);
 
   const W = HEALTH_WEIGHTS;
   const composite = Math.round(
@@ -32,9 +32,8 @@ export async function calculateHealth(stats, cwd = null) {  // ← cwd added
   );
 
   const finalScore = Math.min(100, Math.max(0, composite));
-
-  const issues    = [treeIssues, testIssue, readmeIssue].flat().filter(Boolean);
-  const positives = [freqNote, streakNote, recencyNote].flat().filter(Boolean);
+  const issues     = [treeIssues, testIssue, readmeIssue].flat().filter(Boolean);
+  const positives  = [freqNote, streakNote, recencyNote].flat().filter(Boolean);
 
   const prevHP = stateManager.get().pet.hp;
   if (finalScore !== prevHP) {
@@ -90,35 +89,45 @@ function _streakScore(streak) {
   return [0, null];
 }
 
-async function _workingTreeScore(cwd = null) {  // ← cwd added
-  const lines = await status(cwd);
+async function _workingTreeScore(cwd = null) {
+  // ← use git directly instead of status() to get raw output
+  const raw = await git(['status', '--porcelain'], 8000, cwd);
   const issues = [];
 
+  if (!raw) return [100, []];
+
+  const lines = raw.split('\n').filter(Boolean);
   if (!lines.length) return [100, []];
 
-  const modified  = lines.filter(l => /^[MA]/.test(l)).length;
-  const untracked = lines.filter(l => /^\?\?/.test(l)).length;
+  // porcelain format: XY filename — X=index, Y=worktree
+  // modified/added = any line where either column is not '?' or ' '
+  const modified  = lines.filter(l => {
+    const xy = l.substring(0, 2);
+    return xy !== '??' && xy.trim() !== '';
+  }).length;
+
+  const untracked = lines.filter(l => l.startsWith('??')).length;
 
   if (modified  > 0) issues.push(`${modified} uncommitted change${modified > 1 ? 's' : ''}`);
   if (untracked > 5) issues.push(`${untracked} untracked files`);
 
-  const penalty = modified * 15 + Math.max(0, untracked) * 5;
+  const penalty = modified * 15 + Math.max(0, untracked - 5) * 5;
   const score   = Math.max(0, 100 - penalty);
 
   return [score, issues];
 }
 
-async function _testFilesScore(cwd = null) {  // ← cwd added
-  const patterns = ['**/*.test.*', '**/*.spec.*', '**/test/**', '**/tests/**', '**/jest.config.*'];
+async function _testFilesScore(cwd = null) {
+  const patterns = ['*.test.js', '*.spec.js', '*.test.ts', '*.spec.ts', 'jest.config.js', 'jest.config.ts'];
   const results  = await gitLines(
-    ['ls-files', '--', ...patterns.map(p => p.replace('**/', ''))],
-    cwd  // ← pass cwd
+    ['ls-files', '--', ...patterns],
+    cwd
   );
   if (results.length > 0) return [100, null];
   return [0, 'No test files found — add tests for a happier pet!'];
 }
 
-function _readmeScore(cwd = null) {  // ← cwd added
+function _readmeScore(cwd = null) {
   const base = cwd ?? process.cwd();
   const candidates = ['README.md', 'README.txt', 'README', 'README.rst'];
   const found = candidates.some(f => fs.existsSync(path.resolve(base, f)));
@@ -129,9 +138,13 @@ function _readmeScore(cwd = null) {  // ← cwd added
 function _recentActivityScore(lastCommitDate) {
   if (!lastCommitDate) return [0, null];
 
-  const daysSince = Math.floor(
-    (Date.now() - new Date(lastCommitDate).getTime()) / 86_400_000
-  );
+  // ← compare date strings directly to avoid timezone issues
+  const today     = new Date().toISOString().slice(0, 10);
+  const commitDay = lastCommitDate.slice(0, 10);
+
+  const todayMs  = new Date(today).getTime();
+  const commitMs = new Date(commitDay).getTime();
+  const daysSince = Math.floor((todayMs - commitMs) / 86_400_000);
 
   if (daysSince === 0) return [100, 'Committed today — great work!'];
   if (daysSince <= 1)  return [80,  null];

@@ -1,18 +1,7 @@
 // ============================================================
 // frames.js — All animation frame data
 // ============================================================
-// Each animation is an object:
-//   {
-//     name:   string          — identifier
-//     frames: string[]        — ASCII art frames (one per tick)
-//     fps:    number          — frames per second
-//     loop:   boolean         — loops indefinitely when true
-//     mood:   string[]        — moods that can play this animation
-//   }
-//
-// Frame strings use plain ASCII + box-drawing chars.
-// Keep each frame the same HEIGHT (pad with \n if needed) so the
-// terminal doesn't jump when switching frames.
+
 
 export const FRAME_HEIGHT = 6; // all frames must be this many lines
 

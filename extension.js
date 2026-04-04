@@ -42,14 +42,12 @@ async function loadCore() {
   };
 }
 
-// ── Sidebar Provider ───────────────────────────────────────
 class GitPetViewProvider {
   constructor(context) {
     this._context = context;
     this._view = null;
   }
 
-  // Called by VS Code when the sidebar view becomes visible
   async resolveWebviewView(webviewView) {
     this._view = webviewView;
 
@@ -60,10 +58,14 @@ class GitPetViewProvider {
 
     webviewView.webview.html = getWebviewHtml();
 
-    // Load core only once
     if (!core) {
       core = await loadCore();
       const workspaceFolder = getWorkspaceFolder();
+
+      // ← store workspace path in env so all ESM modules can read it
+      if (workspaceFolder) {
+        process.env.GITPET_WORKSPACE = workspaceFolder;
+      }
 
       core.stateManager.load(workspaceFolder);
       core.initMoodEngine();
@@ -77,11 +79,10 @@ class GitPetViewProvider {
       core.gameLoop.start();
 
       try {
-        await core.scanRepo(workspaceFolder);
+        await core.scanRepo(workspaceFolder, false);
       } catch {}
     }
 
-    // ── UI Bridge ─────────────────────────────────────────
     core.bus.on('ui:render:full', (output) => {
       webviewView.webview.postMessage({ type: 'fullRender', output });
     });
@@ -98,7 +99,6 @@ class GitPetViewProvider {
       webviewView.webview.postMessage({ type: 'mode', mode });
     });
 
-    // ── Mode toggles ──────────────────────────────────────
     let uiMode = 'home';
     const setMode = (mode) => {
       uiMode = mode;
@@ -140,7 +140,6 @@ class GitPetViewProvider {
     core.bus.on('app:exit', () => {
       core.stateManager.updatePet({ lastActive: new Date().toISOString() });
       core.stateManager.save();
-      // In sidebar mode, we just save — we don't close the panel
       core.bus.emit('ui:message', { text: '💾 Game saved!', type: 'success' });
     });
 
@@ -152,7 +151,6 @@ class GitPetViewProvider {
 
     core.bus.emit('pet:updated');
 
-    // ── Messages from webview ─────────────────────────────
     webviewView.webview.onDidReceiveMessage((msg) => {
       setTimeout(() => {
         try {
@@ -174,7 +172,6 @@ class GitPetViewProvider {
       }, 0);
     });
 
-    // Re-render when sidebar becomes visible again
     webviewView.onDidChangeVisibility(() => {
       if (webviewView.visible) {
         core.bus.emit('pet:updated');
@@ -183,20 +180,17 @@ class GitPetViewProvider {
   }
 }
 
-// ── Activate ───────────────────────────────────────────────
 async function activate(context) {
   console.log('[GitPet] Extension Activated');
 
   const provider = new GitPetViewProvider(context);
 
-  // Register the sidebar view provider
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('gitpet.sidebarView', provider, {
       webviewOptions: { retainContextWhenHidden: true }
     })
   );
 
-  // Keep the command too so users can trigger it from command palette
   context.subscriptions.push(
     vscode.commands.registerCommand('gitpet.open', () => {
       vscode.commands.executeCommand('gitpet.sidebarView.focus');

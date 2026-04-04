@@ -10,20 +10,22 @@ import { isGitRepo, gitLines } from './gitService.js';
 import log                 from '../utils/logger.js';
 import { XP_REWARDS }      from '../utils/constants.js';
 
-export async function scanRepo(basePath = null) {
+// ← addXP param: true for feed, false for refresh
+export async function scanRepo(basePath = null, addXP = true) {
   log.info('Scanning repository…');
 
-  // ✅ Always reward XP for feeding, even if not a git repo
-  const xpBefore = stateManager.get().pet.xp;
-  stateManager.addXP(XP_REWARDS.FEED, 'feed/scan');
-  const xpAfter = stateManager.get().pet.xp;
-  log.debug(`XP updated: ${xpBefore} → ${xpAfter}`);
+  // Only add XP when called from feed, not refresh
+  if (addXP) {
+    const xpBefore = stateManager.get().pet.xp;
+    stateManager.addXP(XP_REWARDS.FEED, 'feed/scan');
+    const xpAfter = stateManager.get().pet.xp;
+    log.debug(`XP updated: ${xpBefore} → ${xpAfter}`);
+  }
 
   const isRepo = await isGitRepo(basePath);
 
   if (!isRepo) {
     log.warn('Not inside a git repository.');
-    // still update activity
     stateManager.updatePet({
       scanCount:  (stateManager.get().pet.scanCount ?? 0) + 1,
       lastActive: new Date().toISOString(),
@@ -49,10 +51,8 @@ export async function scanRepo(basePath = null) {
     health:       health.score,
   });
 
-  const currentHP = stateManager.get().pet.hp;
-  if (Math.round(currentHP) !== Math.round(health.score)) {
-    stateManager.setHP(health.score);
-  }
+  // ← Always update HP regardless of whether it changed
+  stateManager.setHP(health.score);
 
   stateManager.updatePet({
     scanCount:  (stateManager.get().pet.scanCount ?? 0) + 1,
@@ -73,12 +73,12 @@ const ISSUE_PATTERNS = [
   { pattern: /console\.log\(/, label: 'console.log' },
 ];
 
-async function _scanCodeIssues(cwd = null) {  // ← cwd added
+async function _scanCodeIssues(cwd = null) {
   const issues = [];
   for (const { pattern, label } of ISSUE_PATTERNS) {
     const lines = await gitLines(
       ['grep', '-n', '-i', '--', pattern.source],
-      cwd  // ← pass cwd
+      cwd
     );
     if (lines.length > 0) {
       issues.push(`${label}: ${lines.length} occurrence${lines.length > 1 ? 's' : ''}`);

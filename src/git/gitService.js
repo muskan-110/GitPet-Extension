@@ -7,12 +7,17 @@ import log          from '../utils/logger.js';
 
 const DEFAULT_TIMEOUT_MS = 8_000;
 
+// ← use GITPET_WORKSPACE env as fallback when cwd not passed
+function resolveCwd(cwd) {
+  return cwd ?? process.env.GITPET_WORKSPACE ?? process.cwd();
+}
+
 export async function git(args, timeout = DEFAULT_TIMEOUT_MS, cwd = null) {
   return new Promise((resolve) => {
     execFile(
       'git',
       args,
-      { cwd: cwd ?? process.cwd(), timeout, maxBuffer: 1024 * 512 },
+      { cwd: resolveCwd(cwd), timeout, maxBuffer: 1024 * 512 },
       (err, stdout, stderr) => {
         if (err) {
           log.debug(`git ${args.join(' ')} → error:`, err.message);

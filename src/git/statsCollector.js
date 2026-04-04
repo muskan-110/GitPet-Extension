@@ -22,7 +22,8 @@ export async function collectStats(cwd = null) {
     commitsByDay[key] = (commitsByDay[key] ?? 0) + 1;
   }
 
-  const today          = toDateKey(new Date());
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   const todayCommits   = commitsByDay[today] ?? 0;
   const streak         = calcStreak(commitsByDay);
   const lastCommitDate = dates[0] ? dates[0].slice(0, 10) : null;

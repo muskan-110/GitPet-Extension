@@ -24,7 +24,6 @@ export function renderTrickMenu(petLevel = 1) {
   lines.push(sep);
   lines.push('');
 
-  // Column headers
   lines.push(
     `  ${c(A.bold, 'Trick'.padEnd(14))}` +
     `${c(A.bold, 'Command'.padEnd(36))}` +
@@ -35,12 +34,12 @@ export function renderTrickMenu(petLevel = 1) {
 
   for (const trick of TRICKS) {
     const unlocked = petLevel >= trick.level;
-    const name    = trick.name.padEnd(14);
-    const cmd     = (trick.command ?? 'git log --oneline -10 (recent commits)').substring(0, 34).padEnd(36);
-    const lvl     = String(trick.level).padEnd(6);
-    const status  = unlocked
+    const name     = trick.name.padEnd(14);
+    const cmd      = (trick.command ?? 'git log --oneline -10').substring(0, 34).padEnd(36);
+    const lvl      = String(trick.level).padEnd(6);
+    const status   = unlocked
       ? c(A.green,  '✅ Ready')
-      : c(A.yellow, `🔒 Locked`);
+      : c(A.yellow, '🔒 Locked');
 
     lines.push(
       `  ${c(unlocked ? A.white : A.dim, name)}` +
@@ -52,6 +51,13 @@ export function renderTrickMenu(petLevel = 1) {
 
   lines.push('');
   lines.push(sep);
+
+  // ← show unlocked tricks as clickable hint
+  const unlocked = TRICKS.filter(t => petLevel >= t.level);
+  if (unlocked.length > 0) {
+    lines.push(c(A.dim, `  Unlocked tricks: ${unlocked.map(t => t.name).join(', ')}`));
+  }
+
   lines.push(c(A.dim, '  Press [P] to close'));
   lines.push('');
 
