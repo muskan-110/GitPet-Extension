@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- ears -->
+  <path d="M22 50 Q18 30 28 22 Q36 18 38 35"/>
+  <path d="M78 50 Q82 30 72 22 Q64 18 62 35"/>
+
+  <!-- head -->
+  <path d="M38 35 Q50 28 62 35 Q80 40 80 58 Q80 78 50 82 Q20 78 20 58 Q20 40 38 35"/>
+
+  <!-- eyes -->
+  <circle cx="38" cy="52" r="3.5" fill="currentColor" stroke="none"/>
+  <circle cx="62" cy="52" r="3.5" fill="currentColor" stroke="none"/>
+
+  <!-- nose -->
+  <path d="M44 64 Q50 61 56 64 Q54 68 50 68 Q46 68 44 64"/>
+  <path fill="currentColor" stroke="none" d="M44 64 Q50 61 56 64 Q54 68 50 68 Q46 68 44 64"/>
+
+  <!-- mouth -->
+  <path d="M44 69 Q47 73 50 72 Q53 73 56 69"/>
+</svg>

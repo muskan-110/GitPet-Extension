@@ -1,0 +1,62 @@
+{
+  "name": "gitpet-extension",
+  "displayName": "GitPet",
+  "description": "A virtual pet that lives in your Git repository.",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/muskan-110/GitPet-Extension.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gitpet-sidebar",
+          "title": "GitPet",
+          "icon": "assets/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "gitpet-sidebar": [
+        {
+          "type": "webview",
+          "id": "gitpet.sidebarView",
+          "name": "GitPet 🐶"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "gitpet.open",
+        "title": "Open GitPet"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.3"
+  },
+  "dependencies": {
+    "simple-git": "^3.33.0"
+  }
+}
